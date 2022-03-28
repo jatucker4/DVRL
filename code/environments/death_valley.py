@@ -32,23 +32,24 @@ def fig2im(fig):
 
 class DeathValleyEnv(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array', '3dfig']}
-
+    # The default values in the init were included to avoid errors while registering the environment
+    # I used the values directly from the yaml
     def __init__(self,
-                 transition_std,
-                 observation_std,
-                 goal_reward,
-                 goal_end,
-                 goal_position,
-                 goal_radius,
-                 outside_box_cost,
-                 starting_position,
-                 starting_std,
-                 action_cost_factor,
-                 max_action_value,
-                 max_time,
-                 box_scale=1,
-                 shaping_power=6,
-                 hill_height=1):
+                 transition_std = 0.025,
+                 observation_std = 0.0,
+                 goal_reward = None,
+                 goal_end = False,
+                 goal_position = [0.7, 0.5],
+                 goal_radius = 0.1,
+                 outside_box_cost = -1.5,
+                 starting_position = [-0.85,-0.85],
+                 starting_std = 0.1,
+                 action_cost_factor = 0.1,
+                 max_action_value = 0.05,
+                 max_time = 100,
+                 box_scale=10,
+                 shaping_power=4,
+                 hill_height=4):
         # print("Observation_std: {}".format(observation_std))
         self.box_scale = box_scale
         # self.box_mean = (self.box_max - self.box_min)/2.

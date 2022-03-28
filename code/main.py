@@ -40,7 +40,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
 from gym.envs.registration import register
-
+# Line below added on 3/14 - test to see if it's necessary to register the environment
+from environments.death_valley import DeathValleyEnv
 from sacred import Experiment
 from sacred.utils import apply_backspaces_and_linefeeds
 
