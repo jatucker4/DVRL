@@ -271,7 +271,7 @@ def register_and_create_Envs(id_tmp_dir, seed, environment, rl_setting):
             )
         except Exception:
             pass
-
+    
     envs = [make_env(environment['name'], seed, i, id_tmp_dir,
                      frameskips_cases=environment['frameskips_cases'])
             for i in range(rl_setting['num_processes'])]
@@ -510,7 +510,7 @@ def main(_run,
         # Main Loop over n_s steps for one gradient update
         tracked_values = collections.defaultdict(lambda: [])
         for step in range(rl_setting['num_steps']):
-
+            
             old_observation = current_memory['current_obs']
 
             policy_return, current_memory, blank_mask, masks, reward = run_model(
@@ -590,6 +590,7 @@ def main(_run,
                                 num_ended_episodes, avg_nr_observed, avg_encoding_loss,
                                 total_loss, value_loss, action_loss, dist_entropy,
                                 rl_setting, algorithm, _run)
+            utils.save_batches(current_memory, id_tmp_dir, j)
 
     # Save final model
     utils.save_model(id_tmp_dir, 'model_final', actor_critic, _run)

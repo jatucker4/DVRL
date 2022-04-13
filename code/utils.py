@@ -5,6 +5,8 @@ import errno
 import os
 import json
 import sys
+from copy import deepcopy
+import csv
 from glob import glob
 import os.path as osp
 import pymongo
@@ -256,3 +258,28 @@ def get_environment_yaml(ex):
     # updates = arg_parser.get_config_updates(args['UPDATE'])[0]
     environment_yaml = config_updates.get('environment', {}).get('config_file', None)
     return environment_yaml
+
+def save_batches(current_memory, id_tmp_dir, batch_num):
+    """
+    batch_num : corresponds to the gradient update number
+    """
+
+    target_csv = id_tmp_dir + "/batch" + str(batch_num) + ".csv"
+    obs_copy = deepcopy(current_memory['current_obs'])
+
+    reward_copy = deepcopy(current_memory['rewards'])
+    
+
+    current_obs_batch = obs_copy.cpu().numpy()
+    obs_x = current_obs_batch[:,0]
+    obs_y = current_obs_batch[:,1]
+
+    reward_batch = reward_copy.cpu().numpy()
+    
+    batch_list = np.column_stack((obs_x, obs_y, reward_batch))
+    
+    fileheader = 'X-Position, Y-Position, Reward'
+
+    np.savetxt(target_csv, batch_list, delimiter=' ', header=fileheader)
+
+    return 0

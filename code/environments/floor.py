@@ -149,3 +149,7 @@ class FloorEnv(gym.Env):
         self._done = False
 
         return obs
+    
+    def seed(self, seed=None):
+        self.np_random, seed = gym.utils.seeding.np_random(seed)
+        return [seed]

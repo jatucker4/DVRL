@@ -19,12 +19,12 @@ def sample_ancestral_index(log_weight):
     """
 
     device = log_weight.device
-    # assert(torch.sum(log_weight != log_weight) == 0)
-    if torch.sum(torch.isnan(log_weight)) == torch.numel(log_weight):
-        log_weight[torch.isnan(log_weight)] = 1.0
+    assert(torch.sum(log_weight != log_weight) == 0)
+    # if torch.sum(torch.isnan(log_weight)) == torch.numel(log_weight):
+    #     log_weight[torch.isnan(log_weight)] = 1.0
 
-    elif torch.sum(torch.isnan(log_weight)) > 0:
-        log_weight[torch.isnan(log_weight)] = 1.0
+    # elif torch.sum(torch.isnan(log_weight)) > 0:
+    #     log_weight[torch.isnan(log_weight)] = 1.0
 
 
     batch_size, num_particles = log_weight.size()
