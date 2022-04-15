@@ -140,9 +140,13 @@ class FloorEnv(gym.Env):
         cond_false = (curr_false_dist >= END_RANGE) * (next_false_dist < END_RANGE)
         reward -= EPI_REWARD * cond_false
 
+        # Scale the reward to be between -1 and 1
+        reward = (2)*(reward + EPI_REWARD)/(2*EPI_REWARD) - 1
         return obs, reward, self._done, info
 
     def reset(self):
+        self.state = np.random.rand(2)
+        self.steps = 0
         self.state[0] = self.state[0] * 0.4 + 0.8
         self.state[1] = self.state[1] * 0.3 + 0.1 + np.random.randint(2) * 0.5
         obs = self.get_observation()
