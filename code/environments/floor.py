@@ -3,7 +3,7 @@ import gym
 
 ######################
 # Environment
-EPI_REWARD = 100
+EPI_REWARD = 1
 DIM_ACTION = 2
 DIM_STATE = 2
 DIM_OBS = 4
@@ -139,9 +139,7 @@ class FloorEnv(gym.Env):
         next_false_dist = l2_distance(next_state, false_target)
         cond_false = (curr_false_dist >= END_RANGE) * (next_false_dist < END_RANGE)
         reward -= EPI_REWARD * cond_false
-
-        # Scale the reward to be between -1 and 1
-        reward = (2)*(reward + EPI_REWARD)/(2*EPI_REWARD) - 1
+        
         return obs, reward, self._done, info
 
     def reset(self):
