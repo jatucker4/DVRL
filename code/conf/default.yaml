@@ -26,7 +26,8 @@ rl_setting:
   num_steps : 5
 
 log:
-  log_interval : 1000
+  # log_interval : 1000
+  log_interval : 10
   save_model_interval : 0
 
   save_reconstruction_interval: 0
