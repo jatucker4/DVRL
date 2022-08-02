@@ -23,7 +23,7 @@ opt:
 rl_setting:
   gamma : 0.99
   num_processes : 16 # 16
-  num_steps : 5
+  num_steps : 25 # increased from 5
 
 log:
   # log_interval : 1000
@@ -40,16 +40,16 @@ loss_function:
   # Num_updates = num_frames//num_steps//num_processes
   num_frames : 50.0e06
   # action_loss: 1
-  action_loss_coef : 1.
+  action_loss_coef : 1.0
   entropy_coef : 0.01
   value_loss_coef : 0.5
-  encoding_loss_coef: 0.0
+  encoding_loss_coef: 0.1
 
 algorithm:
   use_particle_filter : False
 
   # BPTT for num_steps * multiplier_backprop_length
-  multiplier_backprop_length : 5
+  multiplier_backprop_length : 1 # was 5
 
   model:
     # Overwritten and set by environment yaml

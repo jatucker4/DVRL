@@ -272,7 +272,7 @@ def register_and_create_Envs(id_tmp_dir, seed, environment, rl_setting):
         except Exception:
             pass
     
-    envs = [make_env(environment['name'], seed, i, id_tmp_dir,
+    envs = [make_env(environment['name'], seed+i, i, id_tmp_dir,
                      frameskips_cases=environment['frameskips_cases'])
             for i in range(rl_setting['num_processes'])]
 
@@ -315,13 +315,12 @@ def run_model(actor_critic, current_memory, envs,
         current_memory=current_memory,
         predicted_times=predicted_times,
         )
-
+    
     # Execute on environment
     cpu_actions = policy_return.action.detach().squeeze(1).cpu().numpy()
     obs, reward, done, info = envs.step(cpu_actions)
     if not actor_critic.observation_type == 'fc':
         obs = obs / 255.
-
     # Flickering: With probability p_blank, set observation to 0
     blank_mask = np.random.choice(
         [0, 1],
@@ -590,7 +589,7 @@ def main(_run,
                                 num_ended_episodes, avg_nr_observed, avg_encoding_loss,
                                 total_loss, value_loss, action_loss, dist_entropy,
                                 rl_setting, algorithm, _run)
-            utils.save_batches(current_memory, id_tmp_dir, j)
+            # utils.save_batches(current_memory, id_tmp_dir, j)
 
     # Save final model
     utils.save_model(id_tmp_dir, 'model_final', actor_critic, _run)

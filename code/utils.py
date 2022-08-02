@@ -272,7 +272,7 @@ def save_batches(current_memory, id_tmp_dir, batch_num):
 
     current_obs_batch = obs_copy.cpu().numpy()
     obs_x = current_obs_batch[:,0]
-    obs_y = current_obs_batch[:,1]
+    obs_y = current_obs_batch[:,2]
 
     reward_batch = reward_copy.cpu().numpy()
     

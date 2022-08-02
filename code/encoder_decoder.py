@@ -56,18 +56,21 @@ def get_encoder(observation_type, nr_inputs, cnn_channels, batch_norm=True):
                 nn.ReLU(),
                 nn.Linear(cnn_channels[0], cnn_channels[1]),
                 nn.BatchNorm1d(cnn_channels[1]),
-                nn.ReLU())
-                # nn.Linear(cnn_channels[1], cnn_channels[2]),
-                # nn.BatchNorm1d(cnn_channels[2]),
-                # nn.ReLU())
+                nn.ReLU(),
+                nn.Linear(cnn_channels[1], cnn_channels[2]),
+                nn.BatchNorm1d(cnn_channels[2]),
+                nn.ReLU()
+                )
         else:
             enc = nn.Sequential(
                 nn.Linear(nr_inputs, cnn_channels[0]),
                 nn.ReLU(),
                 nn.Linear(cnn_channels[0], cnn_channels[1]),
-                nn.ReLU())
-                # nn.Linear(cnn_channels[1], cnn_channels[2]),
-                # nn.ReLU())
+                nn.ReLU(),
+                nn.Linear(cnn_channels[1], cnn_channels[2]),
+                nn.ReLU()
+                )
+                # Commented in the above two lines on April 26
 
     elif observation_type == '32x32':
         if batch_norm:
@@ -107,10 +110,10 @@ def get_cnn_output_dimension(observation_type, cnn_channels):
         return [cnn_channels[2], 7, 7]
     elif observation_type == '16x16':
         return [cnn_channels[2], 1, 1]
-    elif observation_type == 'fc':
-        return [cnn_channels[1]]
     # elif observation_type == 'fc':
-    #     return [cnn_channels[2]]
+    #     return [cnn_channels[1]]
+    elif observation_type == 'fc':
+        return [cnn_channels[-1]]
     elif observation_type == '32x32':
         return [cnn_channels[2], 3, 3]
 
@@ -168,17 +171,17 @@ def get_decoder(observation_type, nr_inputs, cnn_channels, batch_norm=True):
     elif observation_type == 'fc':
         if batch_norm:
             decoder = nn.Sequential(
-                # nn.Linear(cnn_channels[2], cnn_channels[1]),
-                # nn.BatchNorm1d(cnn_channels[1]),
-                # nn.ReLU(),
+                nn.Linear(cnn_channels[2], cnn_channels[1]),
+                nn.BatchNorm1d(cnn_channels[1]),
+                nn.ReLU(),
                 nn.Linear(cnn_channels[1], cnn_channels[0]),
                 nn.BatchNorm1d(cnn_channels[0]),
                 nn.ReLU(),
             )
         else:
             decoder = nn.Sequential(
-                # nn.Linear(cnn_channels[2], cnn_channels[1]),
-                # nn.ReLU(),
+                nn.Linear(cnn_channels[2], cnn_channels[1]), # Commented in these lines on April 26
+                nn.ReLU(),
                 nn.Linear(cnn_channels[1], cnn_channels[0]),
                 nn.ReLU(),
             )
