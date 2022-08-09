@@ -9,3 +9,8 @@ register(
     id='DeathValley-v0',
     entry_point='environments.death_valley:DeathValleyEnv',
 )
+
+register(
+    id='Stanford-v0',
+    entry_point='environments.stanford_client:StanfordEnvironmentClient',
+)
