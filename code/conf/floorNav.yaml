@@ -36,3 +36,15 @@ environment:
   particle_filter:
     num_particles: 10
     z_dim: 256
+
+cuda : 'cuda:1'
+
+log:
+  log_interval : 10
+  save_model_interval : 1000
+
+  save_reconstruction_interval: 0
+  save_particle_reconstruction: False
+  predicted_times: [0,1,2,3,4,5,10]
+
+  tmp_dir : './tmp/gym/'

@@ -3,7 +3,7 @@ import gym
 
 ######################
 # Environment
-EPI_REWARD = 1
+EPI_REWARD = 100
 DIM_ACTION = 2
 DIM_STATE = 2
 DIM_OBS = 4

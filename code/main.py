@@ -351,7 +351,7 @@ def run_model(actor_critic, current_memory, envs,
     # Also, if action is discrete, convert it to one-hot vector
     current_memory['oneHotActions'] = utils.toOneHot(
         envs.action_space,
-        policy_return.action * masks.type(policy_return.action.type()))
+        policy_return.action * masks.type(policy_return.action.type()).to(device))
 
     current_memory['rewards'][:] = reward
 
