@@ -172,8 +172,24 @@ def log_and_print(j, num_updates, T, id_tmp_dir, final_rewards, tracking,
         # The first few times the results might not be written to file yet
         true_results = load_results(id_tmp_dir)
         last_true_result = true_results.groupby('run_nr').last().mean().loc['r']
+        last_num_steps = true_results.groupby('run_nr').last().mean().loc['l']
+        success_rate = true_results.groupby('run_nr').last().values
+        success_rate = success_rate[:, 2] # Number of steps column
+        num_envs = len(success_rate)
+        MAX_STEPS = 200
+        success_rate = np.sum([steps < MAX_STEPS - 1 for steps in success_rate]) 
+        success_rate /= num_envs
+
+        all_results = np.array(true_results.apply(list))
+        all_success_rate = all_results[:, 2] # Number of steps column
+        denom = len(all_success_rate)
+        all_success_rate = np.sum([steps < MAX_STEPS - 1 for steps in all_success_rate]) 
+        all_success_rate /= denom
     except IndexError:
         last_true_result = 0
+        last_num_steps = 0
+        success_rate = 0
+        all_success_rate = 0
 
     num_frames = j * rl_setting['num_steps'] * rl_setting['num_processes']
 
@@ -188,6 +204,9 @@ def log_and_print(j, num_updates, T, id_tmp_dir, final_rewards, tracking,
                     np.mean(tracking['num_killed_particles']),
                     num_frames)
     _run.log_scalar("episodes.num_ended", num_ended_episodes.item(), num_frames)
+    _run.log_scalar("episodes.num_steps", last_num_steps, num_frames)
+    _run.log_scalar("episodes.success_rate", success_rate, num_frames)
+    _run.log_scalar("episodes.cumulative_success", all_success_rate, num_frames)
     _run.log_scalar("obs.fps", fps, num_frames)
 
     _run.log_scalar("obs.avg_nr_observed", avg_nr_observed)

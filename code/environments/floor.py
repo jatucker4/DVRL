@@ -3,7 +3,7 @@ import gym
 
 ######################
 # Environment
-EPI_REWARD = 100
+EPI_REWARD = 1
 DIM_ACTION = 2
 DIM_STATE = 2
 DIM_OBS = 4
@@ -109,7 +109,7 @@ class FloorEnv(gym.Env):
         self.steps += 1
 
         # Early termination
-        if self.steps >= MAX_STEPS:
+        if self.steps >= MAX_STEPS - 1:
             self._done = True
             return obs, reward, self._done, info
 
