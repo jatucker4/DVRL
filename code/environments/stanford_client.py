@@ -33,7 +33,7 @@ def check_path(path):
 
 class Stanford_Environment_Params():
     def __init__(self):
-        self.epi_reward = 100 #1000 #100
+        self.epi_reward = 1 #1000 #100
         self.step_reward = -1 #-10 #-1
         self.dim_action = 1
         self.velocity = 0.2 #0.1 #0.5 
@@ -57,7 +57,7 @@ class Stanford_Environment_Params():
         # self.testing_data_path = "/home/sampada/testing_hallway/rgbs/*"
         self.training_data_path = "/home/sampada/vae_stanford/training_hallway/rgbs/*"
         self.testing_data_path = "/home/sampada/vae_stanford/testing_hallway/rgbs/*"
-        self.normalization = True
+        self.normalization = False
 
 sep = Stanford_Environment_Params()
 
@@ -220,13 +220,10 @@ class StanfordEnvironmentClient(gym.Env):
         #     obs = self.observation_space.sample()
         # else:
         normalization_data = self.preprocess_data()
-        obs_nav = self.get_observation(normalization_data=normalization_data)
-        obs = OrderedDict()        
-        obs['image'] = obs_nav
-
+        obs = self.get_observation(normalization_data=normalization_data)
         return obs
 
-    def step(self, action, random_obs=False, action_is_vector=True):
+    def step(self, action, random_obs=False, action_is_vector=False):
         # random_obs = True only for debugging purposes
         episode_length = sep.max_steps
         curr_state = self.state
@@ -236,9 +233,9 @@ class StanfordEnvironmentClient(gym.Env):
         #     obs = self.observation_space.sample()
         # else:
         normalization_data = self.preprocess_data()
-        obs_nav = self.get_observation(normalization_data=normalization_data)
-        obs = OrderedDict()        
-        obs['image'] = obs_nav
+        obs = self.get_observation(normalization_data=normalization_data)
+        # obs = OrderedDict()        
+        # obs['image'] = obs_nav
 
         self._step += 1
         
@@ -252,7 +249,7 @@ class StanfordEnvironmentClient(gym.Env):
                 new_theta += 2*np.pi
             next_state = curr_state + action
         else:
-            new_theta = action[0] * np.pi + np.pi
+            new_theta = action * np.pi + np.pi
             vector = np.array([np.cos(new_theta), np.sin(new_theta)]) * sep.velocity  # Go in the direction the new theta is
             next_state = curr_state + vector
     
@@ -322,7 +319,7 @@ class StanfordEnvironmentClient(gym.Env):
     def send_request(self, state_arr, visualize=False): 
         # Send request to the stanford server to get the observation
 
-        print("Sending request for state", state_arr)
+        # print("Sending request for state", state_arr)
         # Send the state as a numpy array
         flags=0
         copy=True
@@ -345,7 +342,7 @@ class StanfordEnvironmentClient(gym.Env):
         buf = memoryview(msg)
         a = np.frombuffer(buf, dtype=md['dtype'])
         obs = a.reshape(md['shape'])
-        print("Received observation")
+        # print("Received observation")
 
         if visualize:
             # Plot the RGB Image
@@ -367,7 +364,7 @@ class StanfordEnvironmentClient(gym.Env):
             state_arr = np.array([state])
 
         image = self.send_request(state_arr)
-        
+    
         if occlusion:
             out = self.noise_image_occlusion(image, state_temp)
         else:
@@ -381,17 +378,16 @@ class StanfordEnvironmentClient(gym.Env):
             plt.imshow(out)
             fig.savefig("NOISY_RECEIVED_OBS.png", bbox_inches='tight', pad_inches=0)
 
-        rmean, gmean, bmean, rstd, gstd, bstd = normalization_data
-        img_rslice = (out[:, :, 0] - rmean)/rstd
-        img_gslice = (out[:, :, 1] - gmean)/gstd
-        img_bslice = (out[:, :, 2] - bmean)/bstd
+        # rmean, gmean, bmean, rstd, gstd, bstd = normalization_data
+        # img_rslice = (out[:, :, 0] - rmean)/rstd
+        # img_gslice = (out[:, :, 1] - gmean)/gstd
+        # img_bslice = (out[:, :, 2] - bmean)/bstd
 
-        out = np.stack([img_rslice, img_gslice, img_bslice], axis=-1)
+        # out = np.stack([img_rslice, img_gslice, img_bslice], axis=-1)
 
         #out = (out - out.mean())/out.std()  # "Normalization" -- TODO
-
         #return out 
-        return np.ndarray.astype(out, np.float32)
+        return np.ndarray.astype(out, np.uint8)
 
     def noise_image(self, image, state, noise_amount=sep.noise_amount):
         salt = 255
