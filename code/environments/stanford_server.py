@@ -6,11 +6,14 @@ import time
 import zlib
 import zmq
 
-from code.environments.stanford_client import StanfordEnvironmentClient
+from stanford_client import StanfordEnvironmentClient
 
 #from examples.examples import *  # generate_observation
-from code.humanav_examples.examples import *
 
+import sys
+sys.path.append("/home/jtucker/DVRL_baseline/DVRL/code/")
+
+from humanav_examples.examples import * 
 
 context = zmq.Context()
 socket = context.socket(zmq.REP)
@@ -41,8 +44,4 @@ while True:
     )
     socket.send_json(md, flags|zmq.SNDMORE)
     socket.send(img, flags, copy=copy, track=track)
-
-
-
-
 

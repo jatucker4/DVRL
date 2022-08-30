@@ -11,10 +11,11 @@ import zmq
 import matplotlib.pyplot as plt
 
 from collections import OrderedDict
-from code.environments.abstract import AbstractEnvironment
-
+# from code.environments.abstract import AbstractEnvironment
+import sys
+sys.path.append("/home/jtucker/DVRL_baseline/DVRL/code/")
 #from examples.examples import *  # generate_observation
-from code.humanav_examples.examples import *
+from humanav_examples.examples import * 
 
 
 context = zmq.Context()
@@ -61,7 +62,8 @@ class Stanford_Environment_Params():
 sep = Stanford_Environment_Params()
 
 
-class StanfordEnvironmentClient(AbstractEnvironment):
+class StanfordEnvironmentClient(gym.Env):
+# class StanfordEnvironmentClient(AbstractEnvironment):
     def __init__(self, disc_thetas=False):
         print("CREATING STANFORD ENV CLIENT - SHOULD ONLY BE HERE ONCE")
 
@@ -91,9 +93,14 @@ class StanfordEnvironmentClient(AbstractEnvironment):
         self.dark_line = (self.yrange[0] + self.yrange[1])/2
         self.dark_line_true = self.dark_line + self.true_env_corner[1]
 
+        self.action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
+        self.low = np.zeros([32, 32, 3], dtype=np.float32)
+        self.high = np.ones([32, 32, 3], dtype=np.float32)
+        self.observation_space =  gym.spaces.Box(self.low, self.high)
+        
         # Get the traversible
         try:
-            traversible = pickle.load(open("traversible.p", "rb"))
+            traversible = pickle.load(open("/home/jtucker/DVRL_baseline/DVRL/code/environments/traversible.p", "rb"))
             dx_m = 0.05
         except Exception:
             # TODO: Deprecated code!
@@ -168,16 +175,16 @@ class StanfordEnvironmentClient(AbstractEnvironment):
                 (state[1] >= self.target_y[0] and state[1] <= self.target_y[1])
         return goal
 
-    @property
-    def observation_space(self):  ## TODO Include pixel wrapper and don't normalize
-        low = np.zeros([64, 64, 3], dtype=np.float32)
-        high = np.ones([64, 64, 3], dtype=np.float32)
-        spaces = {'image': gym.spaces.Box(low, high)}
-        return gym.spaces.Dict(spaces)
+    # @property
+    # def observation_space(self):  ## TODO Include pixel wrapper and don't normalize
+    #     low = np.zeros([64, 64, 3], dtype=np.float32)
+    #     high = np.ones([64, 64, 3], dtype=np.float32)
+    #     spaces = {'image': gym.spaces.Box(low, high)}
+    #     return gym.spaces.Dict(spaces)
 
-    @property
-    def action_space(self):
-        return gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
+    # @property
+    # def action_space(self):
+    #     return gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
     
     def set_test_trap(self, test_trap_is_random=False):
         self.test_trap = True
@@ -209,13 +216,13 @@ class StanfordEnvironmentClient(AbstractEnvironment):
 
             print(self.test_trap_x, self.test_trap_y, "\n\n\n")
 
-        if random_obs:
-            obs = self.observation_space.sample()
-        else:
-            normalization_data = self.preprocess_data()
-            obs_nav = self.get_observation(normalization_data=normalization_data)
-            obs = OrderedDict()        
-            obs['image'] = obs_nav
+        # if random_obs:
+        #     obs = self.observation_space.sample()
+        # else:
+        normalization_data = self.preprocess_data()
+        obs_nav = self.get_observation(normalization_data=normalization_data)
+        obs = OrderedDict()        
+        obs['image'] = obs_nav
 
         return obs
 
@@ -225,13 +232,13 @@ class StanfordEnvironmentClient(AbstractEnvironment):
         curr_state = self.state
 
         # Get the observation at the current state to provide PlaNet the expected output
-        if random_obs:
-            obs = self.observation_space.sample()
-        else:
-            normalization_data = self.preprocess_data()
-            obs_nav = self.get_observation(normalization_data=normalization_data)
-            obs = OrderedDict()        
-            obs['image'] = obs_nav
+        # if random_obs:
+        #     obs = self.observation_space.sample()
+        # else:
+        normalization_data = self.preprocess_data()
+        obs_nav = self.get_observation(normalization_data=normalization_data)
+        obs = OrderedDict()        
+        obs['image'] = obs_nav
 
         self._step += 1
         

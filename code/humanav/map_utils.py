@@ -24,7 +24,7 @@ import sys
 if sys.version_info[0] == 2:
     from . import utils
 else:
-    from planet.humanav import utils #py3
+    from humanav import utils #py3
 
 def _get_xy_bounding_box(vertex, padding):
   """Returns the xy bounding box of the environment."""
