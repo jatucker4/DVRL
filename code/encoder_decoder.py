@@ -56,11 +56,11 @@ def get_encoder(observation_type, nr_inputs, cnn_channels, batch_norm=True):
                 nn.ReLU(),
                 nn.Linear(cnn_channels[0], cnn_channels[1]),
                 nn.BatchNorm1d(cnn_channels[1]),
-                nn.ReLU(),
-                nn.Linear(cnn_channels[1], cnn_channels[2]),
-                nn.BatchNorm1d(cnn_channels[2]),
-                nn.ReLU()
-                )
+                nn.ReLU())#,
+                # nn.Linear(cnn_channels[1], cnn_channels[2]),
+                # nn.BatchNorm1d(cnn_channels[2]),
+                # nn.ReLU()
+                # )
         else:
             enc = nn.Sequential(
                 nn.Linear(nr_inputs, cnn_channels[0]),
@@ -171,9 +171,9 @@ def get_decoder(observation_type, nr_inputs, cnn_channels, batch_norm=True):
     elif observation_type == 'fc':
         if batch_norm:
             decoder = nn.Sequential(
-                nn.Linear(cnn_channels[2], cnn_channels[1]),
-                nn.BatchNorm1d(cnn_channels[1]),
-                nn.ReLU(),
+                # nn.Linear(cnn_channels[2], cnn_channels[1]),
+                # nn.BatchNorm1d(cnn_channels[1]),
+                # nn.ReLU(),
                 nn.Linear(cnn_channels[1], cnn_channels[0]),
                 nn.BatchNorm1d(cnn_channels[0]),
                 nn.ReLU(),

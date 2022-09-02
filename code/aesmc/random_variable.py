@@ -6,7 +6,7 @@ from torch.autograd import Variable
 import logging
 import warnings
 
-device = "cuda:1"
+device = "cuda:2"
 
 class RandomVariable():
     """Base class for random variables. Supported methods:

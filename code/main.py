@@ -54,8 +54,8 @@ from envs import make_env
 from storage import RolloutStorage
 import utils
 
-IS_TESTING = False
-model_name = 'saved_runs/4/model_epoch_1000'
+IS_TESTING = False 
+model_name = 'saved_runs/7/model_epoch_20000'
 
 # Create Sacred Experiment
 ex = Experiment("POMRL")
