@@ -10,35 +10,23 @@ environment:
   # Output coordinates will be normalised and centered around 0
   config:
     transition_std: 0.0
-    observation_std: 0.0
-
-    # Set to None to switch off
-    goal_reward:
-
-    goal_position: [0.7, 0.5]
-    goal_radius: 0.1
-    goal_end: False
-    outside_box_cost: -1.5
-    starting_position: [-0.85, -0.85]
-    starting_std: 0.1
-    max_time: 100
-    max_action_value: 0.5
-    action_cost_factor: 0.01
-    shaping_power: 4
-    hill_height: 4
-    box_scale: 10
+    observation_std: 0.01
 
   model_adaptation:
     cnn_channels : [64, 64]
+    # cnn_channels : [32, 64, 32] # Atari parameters
+    # cnn_channels : [32, 64, 128] # Michael Suggestion
     observation_type : fc
     h_dim: 256
     action_encoding: 64
+    encoder_batch_norm: True
+    policy_batch_norm: True
 
   opt:
-    lr : 1e-4
+    lr : 3.0e-4
 
   loss_function:
-    encoding_loss_coef: 1.0
+    encoding_loss_coef: 0.1
 
   rl_setting_adaptation:
     gamma: 0.99
@@ -46,5 +34,17 @@ environment:
     num_steps: 25 # increased by a factor of 5
 
   particle_filter:
-    num_particles: 30
-    z_dim: 128
+    num_particles: 10
+    z_dim: 256
+
+cuda : 'cuda:2'
+
+log:
+  log_interval : 100
+  save_model_interval : 2500
+
+  save_reconstruction_interval: 0
+  save_particle_reconstruction: False
+  predicted_times: [0,1,2,3,4,5,10]
+
+  tmp_dir : './tmp/gym/'
