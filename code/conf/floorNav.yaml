@@ -13,8 +13,8 @@ environment:
     observation_std: 0.01
 
   model_adaptation:
-    # cnn_channels : [64, 64]
-    cnn_channels : [32, 64, 32] # Atari parameters
+    cnn_channels : [64, 64]
+    # cnn_channels : [32, 64, 32] # Atari parameters
     # cnn_channels : [32, 64, 128] # Michael Suggestion
     observation_type : fc
     h_dim: 256
@@ -36,3 +36,15 @@ environment:
   particle_filter:
     num_particles: 10
     z_dim: 256
+
+cuda : 'cuda:2'
+
+log:
+  log_interval : 100
+  save_model_interval : 2500
+
+  save_reconstruction_interval: 0
+  save_particle_reconstruction: False
+  predicted_times: [0,1,2,3,4,5,10]
+
+  tmp_dir : './tmp/gym/'

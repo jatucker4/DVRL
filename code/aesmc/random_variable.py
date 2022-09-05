@@ -6,6 +6,7 @@ from torch.autograd import Variable
 import logging
 import warnings
 
+device = "cuda:2"
 
 class RandomVariable():
     """Base class for random variables. Supported methods:
@@ -301,14 +302,13 @@ class MultivariateIndependentNormal(RandomVariable):
 
         uniform_normals = torch.Tensor(self._mean.size()).normal_()
         return self._mean.detach() + \
-            Variable(uniform_normals) * torch.sqrt(self._variance.detach())
+            Variable(uniform_normals).to(device) * torch.sqrt(self._variance.detach())
 
     def sample_reparameterized(self, batch_size, num_particles):
         assert(list(self._mean.size()[:2]) == [batch_size, num_particles])
-
         standard_normal = MultivariateIndependentNormal(
-            mean=Variable(torch.zeros(self._mean.size())),
-            variance=Variable(torch.ones(self._variance.size()))
+            mean=Variable(torch.zeros(self._mean.size()).to(device)),
+            variance=Variable(torch.ones(self._variance.size()).to(device))
         )
 
         return self._mean + torch.sqrt(self._variance) * \

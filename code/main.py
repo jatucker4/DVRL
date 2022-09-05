@@ -54,6 +54,9 @@ from envs import make_env
 from storage import RolloutStorage
 import utils
 
+IS_TESTING = False 
+model_name = 'saved_runs/7/model_epoch_20000'
+
 # Create Sacred Experiment
 ex = Experiment("POMRL")
 ex.captured_out_filter = apply_backspaces_and_linefeeds
@@ -351,7 +354,7 @@ def run_model(actor_critic, current_memory, envs,
     # Also, if action is discrete, convert it to one-hot vector
     current_memory['oneHotActions'] = utils.toOneHot(
         envs.action_space,
-        policy_return.action * masks.type(policy_return.action.type()))
+        policy_return.action * masks.type(policy_return.action.type()).to(device))
 
     current_memory['rewards'][:] = reward
 
@@ -457,6 +460,9 @@ def main(_run,
     # to compute target values and 'current_memory' which maintains the last action/observation/latent_state values
     id_tmp_dir, envs, actor_critic, rollouts, current_memory = setup()
 
+    if IS_TESTING:
+        actor_critic.load_state_dict(torch.load(model_name))
+
     tracked_rewards = {
         # Used to tracked how many screens weren't blanked out. Usually not needed
         'nr_observed_screens': collections.deque([0], maxlen=rl_setting['num_steps'] + 1),
@@ -469,27 +475,29 @@ def main(_run,
                       // rl_setting['num_steps']
                       // rl_setting['num_processes'])
 
-    # Count parameters
-    num_parameters = 0
-    for p in actor_critic.parameters():
-        num_parameters += p.nelement()
+    if not IS_TESTING:
+        # Count parameters
+        num_parameters = 0
+        for p in actor_critic.parameters():
+            num_parameters += p.nelement()
 
-    # Initialise optimiser
-    if opt['optimizer'] == 'RMSProp':
-        optimizer = optim.RMSprop(actor_critic.parameters(), opt['lr'],
-                                  eps=opt['eps'], alpha=opt['alpha'])
-    elif opt['optimizer'] == 'Adam':
-        optimizer = optim.Adam(actor_critic.parameters(), opt['lr'],
-                               eps=opt['eps'], betas=opt['betas'])
+        # Initialise optimiser
+        if opt['optimizer'] == 'RMSProp':
+            optimizer = optim.RMSprop(actor_critic.parameters(), opt['lr'],
+                                    eps=opt['eps'], alpha=opt['alpha'])
+        elif opt['optimizer'] == 'Adam':
+            optimizer = optim.Adam(actor_critic.parameters(), opt['lr'],
+                                eps=opt['eps'], betas=opt['betas'])
 
     obs_loss_coef = algorithm['particle_filter']['obs_loss_coef']\
                     if algorithm['use_particle_filter']\
                     else algorithm['model']['obs_loss_coef']
 
     print(actor_critic)
-    logging.info('Number of parameters =\t{}'.format(num_parameters))
     logging.info("Total number of updates: {}".format(num_updates))
-    logging.info("Learning rate: {}".format(opt['lr']))
+    if not IS_TESTING:
+        logging.info('Number of parameters =\t{}'.format(num_parameters))
+        logging.info("Learning rate: {}".format(opt['lr']))
     utils.print_header()
 
     start = time.time()
@@ -512,11 +520,19 @@ def main(_run,
             
             old_observation = current_memory['current_obs']
 
-            policy_return, current_memory, blank_mask, masks, reward = run_model(
-                actor_critic=actor_critic,
-                current_memory=current_memory,
-                envs=envs,
-                predicted_times=predicted_times)
+            if IS_TESTING:
+                with torch.no_grad():
+                    policy_return, current_memory, blank_mask, masks, reward = run_model(
+                        actor_critic=actor_critic,
+                        current_memory=current_memory,
+                        envs=envs,
+                        predicted_times=predicted_times)
+            else:
+                policy_return, current_memory, blank_mask, masks, reward = run_model(
+                    actor_critic=actor_critic,
+                    current_memory=current_memory,
+                    envs=envs,
+                    predicted_times=predicted_times)
 
             # Save in rollouts (for loss computation)
             rollouts.insert(step, reward, masks)
@@ -560,19 +576,20 @@ def main(_run,
                       - dist_entropy * loss_function['entropy_coef']
                       + avg_encoding_loss * loss_function['encoding_loss_coef'])
 
-        optimizer.zero_grad()
+        if not IS_TESTING:
+            optimizer.zero_grad()
 
-        # Only reset the computation graph every 'multiplier_backprop_length' iterations
-        retain_graph = j % algorithm['multiplier_backprop_length'] != 0
-        total_loss.backward(retain_graph=retain_graph)
+            # Only reset the computation graph every 'multiplier_backprop_length' iterations
+            retain_graph = j % algorithm['multiplier_backprop_length'] != 0
+            total_loss.backward(retain_graph=retain_graph)
 
-        if opt['max_grad_norm'] > 0:
-            nn.utils.clip_grad_norm_(actor_critic.parameters(), opt['max_grad_norm'])
+            if opt['max_grad_norm'] > 0:
+                nn.utils.clip_grad_norm_(actor_critic.parameters(), opt['max_grad_norm'])
 
-        optimizer.step()
+            optimizer.step()
 
-        if not retain_graph:
-            current_memory['states'] = current_memory['states'].detach()
+            if not retain_graph:
+                current_memory['states'] = current_memory['states'].detach()
 
         rollouts.after_update()
 

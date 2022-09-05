@@ -109,7 +109,7 @@ class FloorEnv(gym.Env):
         self.steps += 1
 
         # Early termination
-        if self.steps >= MAX_STEPS:
+        if self.steps >= MAX_STEPS - 1:
             self._done = True
             return obs, reward, self._done, info
 

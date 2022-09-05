@@ -46,7 +46,7 @@ loss_function:
   encoding_loss_coef: 0.1
 
 algorithm:
-  use_particle_filter : False
+  use_particle_filter : True
 
   # BPTT for num_steps * multiplier_backprop_length
   multiplier_backprop_length : 1 # was 5
