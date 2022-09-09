@@ -2,7 +2,7 @@ environment:
   name: "Stanford-v0"
   entry_point: "environments.stanford_client:StanfordEnvironmentClient"
   p_blank: 0.5
-  frameskips_cases: ['Asteroids']
+  frameskips_cases: []
   vec_norm: False
 
   model_adaptation:
