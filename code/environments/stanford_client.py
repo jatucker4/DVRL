@@ -260,7 +260,7 @@ class StanfordEnvironmentClient(gym.Env):
                 self.state = next_state
                 self.orientation = new_theta
                 self.reached_goal = True
-                #self.done = True
+                self.done = True
             elif cond_hit == False:  # If collided, don't move. Else move.
                 self.state = next_state
                 self.orientation = new_theta
@@ -277,7 +277,7 @@ class StanfordEnvironmentClient(gym.Env):
             cond_false = self.in_trap(next_state)
             reward -= sep.epi_reward * cond_false
 
-        self.done = self._step >= episode_length - 1
+        # self.done = self._step >= episode_length - 1
 
         info = {}
         return obs, reward, self.done, info
