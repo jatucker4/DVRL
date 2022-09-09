@@ -11,10 +11,6 @@ import zmq
 import matplotlib.pyplot as plt
 
 from collections import OrderedDict
-# from code.environments.abstract import AbstractEnvironment
-import sys
-sys.path.append("/home/jtucker/DVRL_baseline/DVRL/code/")
-#from examples.examples import *  # generate_observation
 from humanav_examples.examples import * 
 
 
