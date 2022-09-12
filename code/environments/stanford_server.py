@@ -7,12 +7,6 @@ import zlib
 import zmq
 
 from stanford_client import StanfordEnvironmentClient
-
-#from examples.examples import *  # generate_observation
-
-import sys
-sys.path.append("/home/jtucker/DVRL_baseline/DVRL/code/")
-
 from humanav_examples.examples import * 
 
 context = zmq.Context()
