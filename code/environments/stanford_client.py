@@ -96,7 +96,7 @@ class StanfordEnvironmentClient(gym.Env):
         
         # Get the traversible
         try:
-            traversible = pickle.load(open("/home/jtucker/DVRL_baseline/DVRL/code/environments/traversible.p", "rb"))
+            traversible = pickle.load(open("traversible.p", "rb"))
             dx_m = 0.05
         except Exception:
             # TODO: Deprecated code!
@@ -265,22 +265,20 @@ class StanfordEnvironmentClient(gym.Env):
                 self.state = next_state
                 self.orientation = new_theta
 
-          ##################
-          # We shouldn't need this block of code because the environment should reset on the done condition
-          #################
-#         # If we just reached the goal, collect reward
-#         # But if we already reached the goal previously, get reward 0
-#         if not temp_reached_goal and self.reached_goal:
-#             reward = sep.epi_reward 
-#         else:
-#             reward = 0
+         
+        # If we just reached the goal, collect reward
+        # But if we already reached the goal previously, get reward 0
+        if not temp_reached_goal and self.reached_goal:
+            reward = sep.epi_reward 
+        else:
+            reward = 0
         
-#         # If already reached goal, don't reason about trap rewards
-#         if not temp_reached_goal:
-#             cond_false = self.in_trap(next_state)
-#             reward -= sep.epi_reward * cond_false
+        # If already reached goal, don't reason about trap rewards
+        if not temp_reached_goal:
+            cond_false = self.in_trap(next_state)
+            reward -= sep.epi_reward * cond_false
 
-#         # self.done = self._step >= episode_length - 1
+        self.done = self._step >= episode_length - 1
 
         info = {}
         return obs, reward, self.done, info
