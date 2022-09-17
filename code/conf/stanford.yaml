@@ -15,7 +15,7 @@ environment:
 
   rl_setting_adaptation:
     gamma : 0.99
-    num_processes : 16
+    num_processes : 2 #16
     num_steps : 25
 
   opt:

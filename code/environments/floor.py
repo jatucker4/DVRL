@@ -113,9 +113,7 @@ class FloorEnv(gym.Env):
             self._done = True
             return obs, reward, self._done, info
 
-        # Normalizing actions
-        if np.linalg.norm(action) > 0.05:
-            action = action / np.linalg.norm(action) * 0.05
+        action = np.tanh(action) * STEP_RANGE
 
         # Transition
         next_state = curr_state + action

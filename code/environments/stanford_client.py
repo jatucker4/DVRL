@@ -245,12 +245,14 @@ class StanfordEnvironmentClient(gym.Env):
                 new_theta += 2*np.pi
             next_state = curr_state + action
         else:
+            action = np.tanh(action)
             new_theta = action * np.pi + np.pi
             vector = np.array([np.cos(new_theta), np.sin(new_theta)]) * sep.velocity  # Go in the direction the new theta is
             next_state = curr_state + vector
     
         cond_hit = self.detect_collision(next_state)
 
+        '''
         # Previous value of reached_goal 
         temp_reached_goal = self.reached_goal
 
@@ -277,8 +279,24 @@ class StanfordEnvironmentClient(gym.Env):
         if not temp_reached_goal:
             cond_false = self.in_trap(next_state)
             reward -= sep.epi_reward * cond_false
+        '''
 
         self.done = self._step >= episode_length - 1
+
+        reward = 0
+        if self.in_goal(next_state):
+            self.state = next_state
+            self.orientation = new_theta
+            self.done = True
+            reward += sep.epi_reward
+            self.reached_goal = True
+        elif cond_hit == False:
+            self.state = next_state
+            self.orientation = new_theta
+        # reward = sep.epi_reward * self.done
+
+        cond_false = self.in_trap(next_state)
+        reward -= sep.epi_reward * cond_false
 
         info = {}
         return obs, reward, self.done, info
@@ -360,7 +378,8 @@ class StanfordEnvironmentClient(gym.Env):
             state = state + self.true_env_corner
             state_arr = np.array([state])
 
-        image = self.send_request(state_arr)
+        # image = self.send_request(state_arr)
+        image = generate_observation_retimg(state_arr)
     
         if occlusion:
             out = self.noise_image_occlusion(image, state_temp)
