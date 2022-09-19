@@ -229,7 +229,11 @@ class StanfordEnvironmentClient(gym.Env):
         #     obs = self.observation_space.sample()
         # else:
         normalization_data = self.preprocess_data()
+        import time
+        t0 = time.time()
         obs = self.get_observation(normalization_data=normalization_data)
+        t1 = time.time()
+        # print("TIME TO GET OBSERVATION", t1-t0)
         # obs = OrderedDict()        
         # obs['image'] = obs_nav
 

@@ -18,6 +18,9 @@ from sacred.observers import MongoObserver
 from sacred.arg_parser import get_config_updates
 
 
+device = "cuda:1"
+
+
 def safe_make_dirs(path):
     """
     Given a path, makes a directory. Doesn't make directory if it already exists. Treats possible
@@ -46,7 +49,7 @@ def toOneHot(action_space, actions):
         actions_onehot_dim[-1] = nr_actions
 
         actions = actions.view(-1, 1).long()
-        action_onehot = torch.FloatTensor(actions.size(0), nr_actions)
+        action_onehot = torch.FloatTensor(actions.size(0), nr_actions).to(device)
 
         return_variable = False
         if isinstance(actions, Variable):
@@ -55,8 +58,8 @@ def toOneHot(action_space, actions):
 
         # In your for loop
         action_onehot.zero_()
-        if actions.is_cuda:
-            action_onehot = action_onehot.cuda()
+        # if actions.is_cuda:
+        #     action_onehot = action_onehot.cuda()
         action_onehot.scatter_(1, actions, 1)
 
         if return_variable:

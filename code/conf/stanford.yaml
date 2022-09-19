@@ -16,12 +16,14 @@ environment:
   rl_setting_adaptation:
     gamma : 0.99
     num_processes : 2 #16
-    num_steps : 25
+    num_steps : 20 #25
 
   opt:
     lr : 3.0e-04
 
   loss_function:
+    # Num_updates = num_frames//num_steps//num_processes
+    num_frames : 25.0e05
     encoding_loss_coef : 0.1
     
   particle_filter:

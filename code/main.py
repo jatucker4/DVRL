@@ -314,14 +314,20 @@ def run_model(actor_critic, current_memory, envs,
     """
 
     # Run model
+    t0 = time.time()
     policy_return = actor_critic(
         current_memory=current_memory,
         predicted_times=predicted_times,
         )
+    t1 = time.time()
+    # print("TIME TO RUN POLICY", t1-t0)
     
     # Execute on environment
     cpu_actions = policy_return.action.detach().squeeze(1).cpu().numpy()
+    t0 = time.time()
     obs, reward, done, info = envs.step(cpu_actions)
+    t1 = time.time()
+    # print("TIME TO STEP", t1-t0)
     if not actor_critic.observation_type == 'fc':
         obs = obs / 255.
     # Flickering: With probability p_blank, set observation to 0
@@ -516,6 +522,8 @@ def main(_run,
 
         # Main Loop over n_s steps for one gradient update
         tracked_values = collections.defaultdict(lambda: [])
+
+        t0 = time.time()
         for step in range(rl_setting['num_steps']):
             
             old_observation = current_memory['current_obs']
@@ -528,11 +536,14 @@ def main(_run,
                         envs=envs,
                         predicted_times=predicted_times)
             else:
+                trun0 = time.time()
                 policy_return, current_memory, blank_mask, masks, reward = run_model(
                     actor_critic=actor_critic,
                     current_memory=current_memory,
                     envs=envs,
                     predicted_times=predicted_times)
+                trun1 = time.time()
+                # print("TIME TO RUN MODEL", trun1-trun0)
 
             # Save in rollouts (for loss computation)
             rollouts.insert(step, reward, masks)
@@ -547,6 +558,10 @@ def main(_run,
             final_rewards, avg_nr_observed, num_ended_episodes = track_rewards(
                 tracked_rewards, reward, masks, blank_mask)
 
+        t1 = time.time()
+        # print("TIME TO COMPLETE 25 STEPS", t1-t0)
+
+        t0 = time.time()
         # Compute bootstrapped value
         with torch.no_grad():
             policy_return = actor_critic(
@@ -592,6 +607,9 @@ def main(_run,
                 current_memory['states'] = current_memory['states'].detach()
 
         rollouts.after_update()
+
+        t1 = time.time()
+        # print("TIME TO RUN EVERYTHING ELSE", t1-t0)
 
         if log['save_model_interval'] > 0 and j % log['save_model_interval'] == 0:
             utils.save_model(id_tmp_dir,
