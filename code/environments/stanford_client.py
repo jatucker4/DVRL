@@ -10,6 +10,8 @@ import zmq
 
 import matplotlib.pyplot as plt
 
+import stanford_viz
+
 from collections import OrderedDict
 from humanav_examples.examples import * 
 
@@ -92,7 +94,7 @@ class StanfordEnvironmentClient(gym.Env):
         self.action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
         self.low = np.zeros([32, 32, 3], dtype=np.float32)
         self.high = np.ones([32, 32, 3], dtype=np.float32)
-        self.observation_space =  gym.spaces.Box(self.low, self.high)
+        self.observation_space = gym.spaces.Box(self.low, self.high)
         
         # Get the traversible
         try:
@@ -115,6 +117,10 @@ class StanfordEnvironmentClient(gym.Env):
         self.testing_data_path = sep.testing_data_path
         self.testing_data_files = glob.glob(self.testing_data_path)
         self.normalization = sep.normalization
+
+        self.episode = {'state': []}
+        self.episode_count = 0
+        self.episode_vis_frequency = 50
 
     def initial_state(self):
         if self.disc_thetas:
@@ -224,6 +230,8 @@ class StanfordEnvironmentClient(gym.Env):
         episode_length = sep.max_steps
         curr_state = self.state
 
+        self.episode['state'].append(self.state)
+
         # Get the observation at the current state to provide PlaNet the expected output
         # if random_obs:
         #     obs = self.observation_space.sample()
@@ -303,6 +311,14 @@ class StanfordEnvironmentClient(gym.Env):
         reward -= sep.epi_reward * cond_false
 
         info = {}
+
+        if self.done:
+            self.episode_count += 1
+            self.episode['state'].append(self.state)
+            if self.episode_count % self.episode_vis_frequency == 0:
+                self.visualize_episode()
+            self.episode = {'state': []}
+
         return obs, reward, self.done, info
     
     def point_to_map(self, pos_2, cast_to_int=True):
@@ -382,8 +398,8 @@ class StanfordEnvironmentClient(gym.Env):
             state = state + self.true_env_corner
             state_arr = np.array([state])
 
-        # image = self.send_request(state_arr)
-        image = generate_observation_retimg(state_arr)
+        image = self.send_request(state_arr)
+        # image = generate_observation_retimg(state_arr)
     
         if occlusion:
             out = self.noise_image_occlusion(image, state_temp)
@@ -539,5 +555,19 @@ class StanfordEnvironmentClient(gym.Env):
             #print("Done preprocessing")
 
             return rmean, gmean, bmean, rstd, gstd, bstd
+    
+    def visualize_episode(self):
+        self.episode['state'] = np.array(self.episode['state'])
+        if self.test_trap:
+            test_traps = [self.test_trap_x[0], 
+                        self.test_trap_y[0], 
+                        self.test_trap_x[1], 
+                        self.test_trap_y[1]]
+        else:
+            test_traps = None
+
+        stanford_viz.plot_maze(self.episode, 'plots_16/plotty_' + str(self.episode_count), test_traps)
+        
+        self.episode = {'state': []}
 
     
