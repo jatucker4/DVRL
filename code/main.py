@@ -54,8 +54,8 @@ from envs import make_env
 from storage import RolloutStorage
 import utils
 
-IS_TESTING = False
-model_name = 'saved_runs/16/model_epoch_25000'
+IS_TESTING = True
+model_name = 'saved_runs/1/model_epoch_25000'
 
 # Create Sacred Experiment
 ex = Experiment("POMRL")
@@ -468,6 +468,7 @@ def main(_run,
 
     if IS_TESTING:
         actor_critic.load_state_dict(torch.load(model_name))
+        actor_critic.eval()
 
     tracked_rewards = {
         # Used to tracked how many screens weren't blanked out. Usually not needed
