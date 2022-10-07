@@ -1,4 +1,4 @@
-seed : 1
+seed : 8
 
 # True/False/auto
 cuda : auto

@@ -55,7 +55,7 @@ from storage import RolloutStorage
 import utils
 
 IS_TESTING = True
-model_name = 'saved_runs/1/model_epoch_25000'
+model_name = 'saved_runs/16/model_epoch_25000'
 
 # Create Sacred Experiment
 ex = Experiment("POMRL")
