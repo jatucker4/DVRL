@@ -3,7 +3,7 @@ import utils
 
 NUM_DESIRED_EPISODES = 1000
 
-id_tmp_dir = 'tmp/gym/37/'
+id_tmp_dir = 'tmp/gym/18/'
 try:
     # The first few times the results might not be written to file yet
     true_results = utils.load_results(id_tmp_dir)

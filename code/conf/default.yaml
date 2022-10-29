@@ -38,7 +38,7 @@ log:
 
 loss_function:
   # Num_updates = num_frames//num_steps//num_processes
-  num_frames : 1.0e5 #10.0e6  # num_steps * num_processes * (desired)num_updates
+  num_frames : 5.0e5  # num_steps * num_processes * (desired)num_updates
   # action_loss: 1
   action_loss_coef : 1.0
   entropy_coef : 0.01
@@ -49,7 +49,7 @@ algorithm:
   use_particle_filter : True
 
   # BPTT for num_steps * multiplier_backprop_length
-  multiplier_backprop_length : 1 # was 5
+  multiplier_backprop_length : 100 #1 # was 5
 
   model:
     # Overwritten and set by environment yaml

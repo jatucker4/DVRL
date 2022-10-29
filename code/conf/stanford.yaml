@@ -34,7 +34,7 @@ cuda : 'cuda:1'
 
 log:
   log_interval : 100
-  save_model_interval : 2500
+  save_model_interval : 1000 #2500
 
   save_reconstruction_interval: 0
   save_particle_reconstruction: False

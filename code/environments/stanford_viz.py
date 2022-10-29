@@ -6,12 +6,14 @@ from matplotlib.patches import Rectangle
 import numpy as np
 import pickle
 
-from stanford_client import StanfordEnvironmentClient
-
-env = StanfordEnvironmentClient()
+# from stanford_client import StanfordEnvironmentClient
+# env = StanfordEnvironmentClient()
       
 
 def plot_maze(episode, figure_name, test_traps=None):
+    from stanford_client import StanfordEnvironmentClient
+    env = StanfordEnvironmentClient()
+
     xlim = env.xrange
     ylim = env.yrange
     goal = [env.target_x[0], env.target_y[0], 

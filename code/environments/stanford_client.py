@@ -23,6 +23,9 @@ socket = context.socket(zmq.REQ)
 socket.connect("tcp://localhost:5555")
 
 
+RUN_ID = 24
+
+
 def check_path(path):
     if not os.path.exists(path):
         #print("[INFO] making folder %s" % path)
@@ -42,7 +45,7 @@ class Stanford_Environment_Params():
         self.obs_std_dark = 0.1
         self.step_range = 1 #0.05
         self.max_steps = 200  
-        self.noise_amount = 0.4 #1.0 #0.4 #0.15
+        self.noise_amount = 0.0 #0.4 #1.0 #0.4 #0.15
         self.occlusion_amount = 15
         self.salt_vs_pepper = 0.5
         self.fig_format = '.png'
@@ -91,9 +94,12 @@ class StanfordEnvironmentClient(gym.Env):
         self.dark_line = (self.yrange[0] + self.yrange[1])/2
         self.dark_line_true = self.dark_line + self.true_env_corner[1]
 
-        self.action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
-        self.low = np.zeros([32, 32, 3], dtype=np.float32)
-        self.high = np.ones([32, 32, 3], dtype=np.float32)
+        # self.action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
+        self.action_space = gym.spaces.Box(low=np.array([-1.0, -1.0]), high=np.array([1.0, 1.0]), dtype=np.float32)
+        # self.low = np.zeros([32, 32, 3], dtype=np.float32)
+        # self.high = np.ones([32, 32, 3], dtype=np.float32)
+        self.low = np.zeros([32, 32, 1], dtype=np.float32)
+        self.high = np.ones([32, 32, 1], dtype=np.float32)
         self.observation_space = gym.spaces.Box(self.low, self.high)
         
         # Get the traversible
@@ -120,7 +126,7 @@ class StanfordEnvironmentClient(gym.Env):
 
         self.episode = {'state': []}
         self.episode_count = 0
-        self.episode_vis_frequency = 50
+        self.episode_vis_frequency = 10
 
     def initial_state(self):
         if self.disc_thetas:
@@ -225,7 +231,7 @@ class StanfordEnvironmentClient(gym.Env):
         obs = self.get_observation(normalization_data=normalization_data)
         return obs
 
-    def step(self, action, random_obs=False, action_is_vector=False):
+    def step(self, action, random_obs=False, action_is_vector=True):
         # random_obs = True only for debugging purposes
         episode_length = sep.max_steps
         curr_state = self.state
@@ -249,8 +255,9 @@ class StanfordEnvironmentClient(gym.Env):
         
         if action_is_vector:
             # Normalizing actions
-            if np.linalg.norm(action) > 0.2:
-                action = action / np.linalg.norm(action) * 0.2
+            # if np.linalg.norm(action) > 0.2:
+            #     action = action / np.linalg.norm(action) * 0.2
+            action = action * sep.velocity
             
             new_theta = np.arctan2(action[1], action[0])
             if new_theta < 0:  # Arctan stuff
@@ -263,35 +270,6 @@ class StanfordEnvironmentClient(gym.Env):
             next_state = curr_state + vector
     
         cond_hit = self.detect_collision(next_state)
-
-        '''
-        # Previous value of reached_goal 
-        temp_reached_goal = self.reached_goal
-
-        # If already reached goal, don't move
-        if not temp_reached_goal:
-            if self.in_goal(next_state):
-                self.state = next_state
-                self.orientation = new_theta
-                self.reached_goal = True
-                self.done = True
-            elif cond_hit == False:  # If collided, don't move. Else move.
-                self.state = next_state
-                self.orientation = new_theta
-
-         
-        # If we just reached the goal, collect reward
-        # But if we already reached the goal previously, get reward 0
-        if not temp_reached_goal and self.reached_goal:
-            reward = sep.epi_reward 
-        else:
-            reward = 0
-        
-        # If already reached goal, don't reason about trap rewards
-        if not temp_reached_goal:
-            cond_false = self.in_trap(next_state)
-            reward -= sep.epi_reward * cond_false
-        '''
 
         self.done = self._step >= episode_length - 1
 
@@ -408,11 +386,22 @@ class StanfordEnvironmentClient(gym.Env):
 
         out = np.ascontiguousarray(out)
 
+        # Luminosity method of converting RGB to grayscale
+        # grayscale = 0.3 * R + 0.59 * G + 0.11 * B
+        img_rslice = 0.3 * out[:, :, 0]
+        img_gslice = 0.59 * out[:, :, 1]
+        img_bslice = 0.11 * out[:, :, 2]
+
+        out = img_rslice + img_gslice + img_bslice
+
         if visualize:
             # Plot the RGB Image
             fig = plt.figure()
-            plt.imshow(out)
+            # plt.imshow(out)
+            plt.imshow(out, cmap='gray', vmin=0, vmax=255)
             fig.savefig("NOISY_RECEIVED_OBS.png", bbox_inches='tight', pad_inches=0)
+
+        out = out.reshape((32, 32, 1))
 
         # rmean, gmean, bmean, rstd, gstd, bstd = normalization_data
         # img_rslice = (out[:, :, 0] - rmean)/rstd
@@ -422,7 +411,7 @@ class StanfordEnvironmentClient(gym.Env):
         # out = np.stack([img_rslice, img_gslice, img_bslice], axis=-1)
 
         #out = (out - out.mean())/out.std()  # "Normalization" -- TODO
-        #return out 
+        #return out
         return np.ndarray.astype(out, np.uint8)
 
     def noise_image(self, image, state, noise_amount=sep.noise_amount):
@@ -566,7 +555,7 @@ class StanfordEnvironmentClient(gym.Env):
         else:
             test_traps = None
 
-        stanford_viz.plot_maze(self.episode, 'plots_16/plotty_' + str(self.episode_count), test_traps)
+        stanford_viz.plot_maze(self.episode, 'plots_' + str(RUN_ID) + '/plotty_' + str(self.episode_count), test_traps)
         
         self.episode = {'state': []}
 

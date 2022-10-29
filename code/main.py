@@ -54,8 +54,8 @@ from envs import make_env
 from storage import RolloutStorage
 import utils
 
-IS_TESTING = True
-model_name = 'saved_runs/16/model_epoch_25000'
+IS_TESTING = False
+model_name = 'saved_runs/14/model_epoch_2500'
 
 # Create Sacred Experiment
 ex = Experiment("POMRL")
@@ -330,6 +330,7 @@ def run_model(actor_critic, current_memory, envs,
     # print("TIME TO STEP", t1-t0)
     if not actor_critic.observation_type == 'fc':
         obs = obs / 255.
+        
     # Flickering: With probability p_blank, set observation to 0
     blank_mask = np.random.choice(
         [0, 1],
