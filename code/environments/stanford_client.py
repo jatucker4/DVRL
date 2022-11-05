@@ -23,7 +23,9 @@ socket = context.socket(zmq.REQ)
 socket.connect("tcp://localhost:5555")
 
 
-RUN_ID = 24
+RUN_ID = 30
+IS_TESTING = False
+planning_time_file = "planning_times.txt"
 
 
 def check_path(path):
@@ -45,7 +47,7 @@ class Stanford_Environment_Params():
         self.obs_std_dark = 0.1
         self.step_range = 1 #0.05
         self.max_steps = 200  
-        self.noise_amount = 0.0 #0.4 #1.0 #0.4 #0.15
+        self.noise_amount = 0.4 #1.0 #0.4 #0.15
         self.occlusion_amount = 15
         self.salt_vs_pepper = 0.5
         self.fig_format = '.png'
@@ -94,12 +96,12 @@ class StanfordEnvironmentClient(gym.Env):
         self.dark_line = (self.yrange[0] + self.yrange[1])/2
         self.dark_line_true = self.dark_line + self.true_env_corner[1]
 
-        # self.action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
-        self.action_space = gym.spaces.Box(low=np.array([-1.0, -1.0]), high=np.array([1.0, 1.0]), dtype=np.float32)
-        # self.low = np.zeros([32, 32, 3], dtype=np.float32)
-        # self.high = np.ones([32, 32, 3], dtype=np.float32)
-        self.low = np.zeros([32, 32, 1], dtype=np.float32)
-        self.high = np.ones([32, 32, 1], dtype=np.float32)
+        self.action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
+        # self.action_space = gym.spaces.Box(low=np.array([-1.0, -1.0]), high=np.array([1.0, 1.0]), dtype=np.float32)
+        self.low = np.zeros([32, 32, 3], dtype=np.float32)
+        self.high = np.ones([32, 32, 3], dtype=np.float32)
+        # self.low = np.zeros([32, 32, 1], dtype=np.float32)
+        # self.high = np.ones([32, 32, 1], dtype=np.float32)
         self.observation_space = gym.spaces.Box(self.low, self.high)
         
         # Get the traversible
@@ -231,7 +233,7 @@ class StanfordEnvironmentClient(gym.Env):
         obs = self.get_observation(normalization_data=normalization_data)
         return obs
 
-    def step(self, action, random_obs=False, action_is_vector=True):
+    def step(self, action, random_obs=False, action_is_vector=False):
         # random_obs = True only for debugging purposes
         episode_length = sep.max_steps
         curr_state = self.state
@@ -251,6 +253,10 @@ class StanfordEnvironmentClient(gym.Env):
         # obs = OrderedDict()        
         # obs['image'] = obs_nav
 
+        if IS_TESTING:
+            with open(planning_time_file, 'a') as f:
+                f.write('\nStep ' + str(self._step))
+                f.close()
         self._step += 1
         
         if action_is_vector:
@@ -264,7 +270,6 @@ class StanfordEnvironmentClient(gym.Env):
                 new_theta += 2*np.pi
             next_state = curr_state + action
         else:
-            action = np.tanh(action)
             new_theta = action * np.pi + np.pi
             vector = np.array([np.cos(new_theta), np.sin(new_theta)]) * sep.velocity  # Go in the direction the new theta is
             next_state = curr_state + vector
@@ -296,6 +301,12 @@ class StanfordEnvironmentClient(gym.Env):
             if self.episode_count % self.episode_vis_frequency == 0:
                 self.visualize_episode()
             self.episode = {'state': []}
+        
+        if IS_TESTING:
+            if self.reached_goal:
+                with open(planning_time_file, 'a') as f:
+                    f.write('\nStep ' + str(self._step) + ' Reached Goal')
+                    f.close()
 
         return obs, reward, self.done, info
     
@@ -388,11 +399,10 @@ class StanfordEnvironmentClient(gym.Env):
 
         # Luminosity method of converting RGB to grayscale
         # grayscale = 0.3 * R + 0.59 * G + 0.11 * B
-        img_rslice = 0.3 * out[:, :, 0]
-        img_gslice = 0.59 * out[:, :, 1]
-        img_bslice = 0.11 * out[:, :, 2]
-
-        out = img_rslice + img_gslice + img_bslice
+        # img_rslice = 0.3 * out[:, :, 0]
+        # img_gslice = 0.59 * out[:, :, 1]
+        # img_bslice = 0.11 * out[:, :, 2]
+        # out = img_rslice + img_gslice + img_bslice
 
         if visualize:
             # Plot the RGB Image
@@ -401,7 +411,7 @@ class StanfordEnvironmentClient(gym.Env):
             plt.imshow(out, cmap='gray', vmin=0, vmax=255)
             fig.savefig("NOISY_RECEIVED_OBS.png", bbox_inches='tight', pad_inches=0)
 
-        out = out.reshape((32, 32, 1))
+        # out = out.reshape((32, 32, 1))
 
         # rmean, gmean, bmean, rstd, gstd, bstd = normalization_data
         # img_rslice = (out[:, :, 0] - rmean)/rstd

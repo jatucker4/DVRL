@@ -1,9 +1,9 @@
 import numpy as np
 import utils
 
-NUM_DESIRED_EPISODES = 1000
+NUM_DESIRED_EPISODES = 500
 
-id_tmp_dir = 'tmp/gym/18/'
+id_tmp_dir = 'tmp/gym/29/'
 try:
     # The first few times the results might not be written to file yet
     true_results = utils.load_results(id_tmp_dir)
@@ -17,8 +17,10 @@ try:
     steps = steps[:NUM_DESIRED_EPISODES]
     rewards = rewards[:NUM_DESIRED_EPISODES]
 
-    all_success_rate = np.sum([step < MAX_STEPS - 1 for step in steps])/NUM_DESIRED_EPISODES
-    successful_episodes = [i for i in range(NUM_DESIRED_EPISODES) if steps[i] < MAX_STEPS - 1]
+    # all_success_rate = np.sum([step < MAX_STEPS - 1 for step in steps])/NUM_DESIRED_EPISODES
+    # successful_episodes = [i for i in range(NUM_DESIRED_EPISODES) if steps[i] < MAX_STEPS - 1]
+    all_success_rate = np.sum([step < MAX_STEPS - 1 for step in steps])/len(steps)
+    successful_episodes = [i for i in range(len(steps)) if steps[i] < MAX_STEPS - 1]
     rewards = rewards[successful_episodes]
     steps = steps[successful_episodes]
 

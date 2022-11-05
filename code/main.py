@@ -55,7 +55,8 @@ from storage import RolloutStorage
 import utils
 
 IS_TESTING = False
-model_name = 'saved_runs/14/model_epoch_2500'
+model_name = 'saved_runs/28/model_epoch_63000'
+planning_time_file = "planning_times.txt"
 
 # Create Sacred Experiment
 ex = Experiment("POMRL")
@@ -320,12 +321,18 @@ def run_model(actor_critic, current_memory, envs,
         predicted_times=predicted_times,
         )
     t1 = time.time()
-    # print("TIME TO RUN POLICY", t1-t0)
+    # print("TIME TO RUN POLICY", t1-t0) 
+    if IS_TESTING:
+        with open(planning_time_file, 'a') as f:
+            f.write('\n' + str(t1-t0))
+            f.close()
     
     # Execute on environment
     cpu_actions = policy_return.action.detach().squeeze(1).cpu().numpy()
+    # print("CPU ACTIONS", cpu_actions)
     t0 = time.time()
     obs, reward, done, info = envs.step(cpu_actions)
+    # print("DONE", done)
     t1 = time.time()
     # print("TIME TO STEP", t1-t0)
     if not actor_critic.observation_type == 'fc':
