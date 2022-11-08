@@ -55,7 +55,7 @@ from storage import RolloutStorage
 import utils
 
 IS_TESTING = False
-model_name = 'saved_runs/28/model_epoch_63000'
+model_name = 'saved_runs/32/model_epoch_13000'
 planning_time_file = "planning_times.txt"
 
 # Create Sacred Experiment

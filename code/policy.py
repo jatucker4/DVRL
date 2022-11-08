@@ -74,8 +74,8 @@ class DiagGaussian(nn.Module):
             action = action_mean + action_std * noise
         else:
             action = action_mean
-        # return action
-        return torch.tanh(action)
+        return action
+        # return torch.tanh(action)
 
     def logprobs_and_entropy(self, x, actions):
         action_mean, action_logstd = self(x)

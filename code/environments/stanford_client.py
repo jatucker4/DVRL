@@ -23,7 +23,7 @@ socket = context.socket(zmq.REQ)
 socket.connect("tcp://localhost:5555")
 
 
-RUN_ID = 30
+RUN_ID = 34
 IS_TESTING = False
 planning_time_file = "planning_times.txt"
 
@@ -96,8 +96,8 @@ class StanfordEnvironmentClient(gym.Env):
         self.dark_line = (self.yrange[0] + self.yrange[1])/2
         self.dark_line_true = self.dark_line + self.true_env_corner[1]
 
-        self.action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
-        # self.action_space = gym.spaces.Box(low=np.array([-1.0, -1.0]), high=np.array([1.0, 1.0]), dtype=np.float32)
+        # self.action_space = gym.spaces.Box(low=np.array([-1.0]), high=np.array([1.0]), dtype=np.float32)
+        self.action_space = gym.spaces.Box(low=np.array([-1.0, -1.0]), high=np.array([1.0, 1.0]), dtype=np.float32)
         self.low = np.zeros([32, 32, 3], dtype=np.float32)
         self.high = np.ones([32, 32, 3], dtype=np.float32)
         # self.low = np.zeros([32, 32, 1], dtype=np.float32)
@@ -233,7 +233,7 @@ class StanfordEnvironmentClient(gym.Env):
         obs = self.get_observation(normalization_data=normalization_data)
         return obs
 
-    def step(self, action, random_obs=False, action_is_vector=False):
+    def step(self, action, random_obs=False, action_is_vector=True):
         # random_obs = True only for debugging purposes
         episode_length = sep.max_steps
         curr_state = self.state
@@ -263,13 +263,16 @@ class StanfordEnvironmentClient(gym.Env):
             # Normalizing actions
             # if np.linalg.norm(action) > 0.2:
             #     action = action / np.linalg.norm(action) * 0.2
-            action = action * sep.velocity
+            action = np.tanh(action) * sep.velocity
             
             new_theta = np.arctan2(action[1], action[0])
             if new_theta < 0:  # Arctan stuff
                 new_theta += 2*np.pi
             next_state = curr_state + action
         else:
+            # Force action between -1 and 1
+            if np.abs(action) > 1.0:
+                action = np.sign(action)
             new_theta = action * np.pi + np.pi
             vector = np.array([np.cos(new_theta), np.sin(new_theta)]) * sep.velocity  # Go in the direction the new theta is
             next_state = curr_state + vector
