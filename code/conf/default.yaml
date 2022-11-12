@@ -1,4 +1,4 @@
-seed : 8
+seed : 1
 
 # True/False/auto
 cuda : auto
@@ -38,7 +38,7 @@ log:
 
 loss_function:
   # Num_updates = num_frames//num_steps//num_processes
-  num_frames : 10.0e6  # num_steps * num_processes * (desired)num_updates -- 1e5 for 3D L-D
+  num_frames : 1.0e5 #1.2e6  # num_steps * num_processes * (desired)num_updates -- 1e5 for 3D L-D
   # action_loss: 1
   action_loss_coef : 1.0
   entropy_coef : 0.01

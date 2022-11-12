@@ -54,8 +54,8 @@ from envs import make_env
 from storage import RolloutStorage
 import utils
 
-IS_TESTING = False
-model_name = 'saved_runs/32/model_epoch_13000'
+IS_TESTING = True
+model_name = 'saved_runs/1/model_final'
 planning_time_file = "planning_times.txt"
 
 # Create Sacred Experiment
