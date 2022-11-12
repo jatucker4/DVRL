@@ -23,8 +23,9 @@ socket = context.socket(zmq.REQ)
 socket.connect("tcp://localhost:5555")
 
 
-RUN_ID = 34
-IS_TESTING = False
+RUN_ID = 2
+EPISODE_VIZ_FREQUENCY = 1
+IS_TESTING = True
 planning_time_file = "planning_times.txt"
 
 
@@ -128,7 +129,7 @@ class StanfordEnvironmentClient(gym.Env):
 
         self.episode = {'state': []}
         self.episode_count = 0
-        self.episode_vis_frequency = 10
+        self.episode_vis_frequency = EPISODE_VIZ_FREQUENCY
 
     def initial_state(self):
         if self.disc_thetas:
