@@ -16,6 +16,7 @@ try:
     print("NUM EPISODES", num_episodes)
     steps = steps[:NUM_DESIRED_EPISODES]
     rewards = rewards[:NUM_DESIRED_EPISODES]
+    print(steps)
 
     # all_success_rate = np.sum([step < MAX_STEPS - 1 for step in steps])/NUM_DESIRED_EPISODES
     # successful_episodes = [i for i in range(NUM_DESIRED_EPISODES) if steps[i] < MAX_STEPS - 1]

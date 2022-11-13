@@ -322,9 +322,10 @@ def run_model(actor_critic, current_memory, envs,
         )
     t1 = time.time()
     # print("TIME TO RUN POLICY", t1-t0) 
+    lines = ['', 'Policy', str(t1-t0)]
     if IS_TESTING:
         with open(planning_time_file, 'a') as f:
-            f.write('\n' + str(t1-t0))
+            f.write('\n'.join(lines))
             f.close()
     
     # Execute on environment

@@ -254,9 +254,10 @@ class StanfordEnvironmentClient(gym.Env):
         # obs = OrderedDict()        
         # obs['image'] = obs_nav
 
+        lines = ['', 'Step', str(self._step)]
         if IS_TESTING:
             with open(planning_time_file, 'a') as f:
-                f.write('\nStep ' + str(self._step))
+                f.write('\n'.join(lines))
                 f.close()
         self._step += 1
         
@@ -309,7 +310,13 @@ class StanfordEnvironmentClient(gym.Env):
         if IS_TESTING:
             if self.reached_goal:
                 with open(planning_time_file, 'a') as f:
-                    f.write('\nStep ' + str(self._step) + ' Reached Goal')
+                    lines = ['', 'Reached Goal', str(self._step)]
+                    f.write('\n'.join(lines))
+                    f.close()
+            if self._step == episode_length - 1:
+                with open(planning_time_file, 'a') as f:
+                    lines = ['', 'Did not reach goal', str(self._step)]
+                    f.write('\nDid not reach goal' + '\n' + str(self._step))
                     f.close()
 
         return obs, reward, self.done, info
