@@ -2,7 +2,7 @@ import numpy as np
 
 # WARNING: This file assumes there are only 2 processes (at test time)!
 
-planning_time_file = "planning_times.txt"
+planning_time_file = "planning_times_testtrap.txt"
 NUM_DESIRED_EPISODES = 250 
 MAX_STEPS = 200
 

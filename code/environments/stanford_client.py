@@ -23,10 +23,10 @@ socket = context.socket(zmq.REQ)
 socket.connect("tcp://localhost:5555")
 
 
-RUN_ID = 2
+RUN_ID = 3
 EPISODE_VIZ_FREQUENCY = 1
 IS_TESTING = True
-planning_time_file = "planning_times.txt"
+planning_time_file = "planning_times_testtrap.txt"
 
 
 def check_path(path):
@@ -86,7 +86,7 @@ class StanfordEnvironmentClient(gym.Env):
         self.target_y = [0, 0.25]
 
         # During test time - have an additional trap region (optional)
-        self.test_trap = False
+        self.test_trap = True
         self.test_trap_is_random = True
         self.test_trap_x = [[3, 3.5], [5, 5.5]] #[[1.5, 2], [6.5, 7]] #[3.5, 5]
         self.test_trap_y = [[0.5, 1], [0.5, 1]] #[0.5, 1] #[0.75, 1.25]
