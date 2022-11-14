@@ -1,6 +1,8 @@
 import numpy as np
 import gym
 
+import floor_viz
+
 ######################
 # Environment
 EPI_REWARD = 1
@@ -15,6 +17,12 @@ FIG_FORMAT = '.png'
 IMG = 'img/'
 CKPT = 'ckpt/'
 device = 'cuda'
+
+
+RUN_ID = 38
+EPISODE_VIZ_FREQUENCY = 1
+IS_TESTING = True
+planning_time_file = "planning_times_testtrap.txt"
 
 
 def detect_collison(curr_state, next_state):
@@ -65,6 +73,10 @@ class FloorEnv(gym.Env):
         self.action_space = gym.spaces.Box(low=np.float32(np.array([-0.05, -0.05])), high=np.float32(np.array([0.05, 0.05])))
         self.observation_space = gym.spaces.Box(low=np.float32(np.array([0.0, 0.0, 0.0, 0.0])), high=np.float32(np.array([2.0, 1.0, 2.0, 1.0])))
 
+        self.episode = {'state': []}
+        self.episode_count = 0
+        self.episode_vis_frequency = EPISODE_VIZ_FREQUENCY
+
     def get_observation(self):
         x = self.state[0]
         y = self.state[1]
@@ -106,11 +118,32 @@ class FloorEnv(gym.Env):
         obs = self.get_observation()
         curr_state = self.state
         self._done = False
+
+        lines = ['', 'Step', str(self.steps)]
+        if IS_TESTING:
+            with open(planning_time_file, 'a') as f:
+                f.write('\n'.join(lines))
+                f.close()
         self.steps += 1
+
+        self.episode['state'].append(self.state)
 
         # Early termination
         if self.steps >= MAX_STEPS - 1:
             self._done = True
+
+            self.episode_count += 1
+            self.episode['state'].append(self.state)
+            if self.episode_count % self.episode_vis_frequency == 0:
+                self.visualize_episode()
+            self.episode = {'state': []}
+
+            if IS_TESTING:
+                with open(planning_time_file, 'a') as f:
+                    lines = ['', 'Did not reach goal', str(self.steps)]
+                    f.write('\nDid not reach goal' + '\n' + str(self.steps))
+                    f.close()
+            
             return obs, reward, self._done, info
 
         action = np.tanh(action) * STEP_RANGE
@@ -137,6 +170,20 @@ class FloorEnv(gym.Env):
         next_false_dist = l2_distance(next_state, false_target)
         cond_false = (curr_false_dist >= END_RANGE) * (next_false_dist < END_RANGE)
         reward -= EPI_REWARD * cond_false
+
+        if self._done:
+            self.episode_count += 1
+            self.episode['state'].append(self.state)
+            if self.episode_count % self.episode_vis_frequency == 0:
+                self.visualize_episode()
+            self.episode = {'state': []}
+        
+        if IS_TESTING:
+            if self._done:
+                with open(planning_time_file, 'a') as f:
+                    lines = ['', 'Reached Goal', str(self.steps)]
+                    f.write('\n'.join(lines))
+                    f.close()
         
         return obs, reward, self._done, info
 
@@ -153,3 +200,8 @@ class FloorEnv(gym.Env):
     def seed(self, seed=None):
         self.np_random, seed = gym.utils.seeding.np_random(seed)
         return [seed]
+    
+    def visualize_episode(self):
+        self.episode['state'] = np.array(self.episode['state'])
+        floor_viz.plot_maze(self.episode['state'], 'plots_' + str(RUN_ID) + '/plotty_' + str(self.episode_count))
+        self.episode = {'state': []}
