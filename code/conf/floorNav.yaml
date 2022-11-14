@@ -37,7 +37,7 @@ environment:
     num_particles: 10
     z_dim: 256
 
-cuda : 'cuda:3'
+cuda : 'cuda:1'
 
 log:
   log_interval : 1 #100
