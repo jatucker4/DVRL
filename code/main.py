@@ -56,7 +56,7 @@ import utils
 
 IS_TESTING = True
 model_name = 'saved_runs/1/model_final'
-planning_time_file = "planning_times_testtrap.txt"
+planning_time_file = "planning_times_occ.txt"
 
 # Create Sacred Experiment
 ex = Experiment("POMRL")
