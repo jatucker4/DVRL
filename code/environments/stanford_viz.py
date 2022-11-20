@@ -78,5 +78,6 @@ def plot_maze(episode, figure_name, test_traps=None):
             plt.plot(x[i], y[i], color=viridis(colorvec[i]), marker='o')
 
     ax.set_aspect('equal')
-    plt.savefig(figure_name)
+    plt.savefig(figure_name, bbox_inches='tight', dpi=1000)
+    # plt.savefig(figure_name, bbox_inches='tight')
     plt.close()

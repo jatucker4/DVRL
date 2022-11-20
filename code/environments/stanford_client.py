@@ -23,10 +23,10 @@ socket = context.socket(zmq.REQ)
 socket.connect("tcp://localhost:5555")
 
 
-RUN_ID = 4
+RUN_ID = 7
 EPISODE_VIZ_FREQUENCY = 1
 IS_TESTING = True
-planning_time_file = "planning_times_occ.txt"
+planning_time_file = "planning_times_viz_occ.txt"
 
 
 def check_path(path):
